@@ -1,0 +1,7 @@
+{
+  "version": "1.7.0",
+  "sha256": "5a0de8531e4720c957f339ed2e901b60c787548c331cebd3f44c313945e62634",
+  "publishedAt": "2026-11-26T23:12:14Z",
+  "notes": "# Elite 1.7.0\r\n\r\n- Aviso de nova versão durante o uso, com consulta a cada minuto e ao voltar para a tela.\r\n- Aviso com novidades e ação de atualização, sem recarregamento automático nem interrupção dos lançamentos.\r\n- No navegador, a ação carrega a nova versão web. No Windows, oferece o executável oficial.\r\n- Cadastro de várias chaves Pix para o mesmo banco em uma única operação.\r\n- Linhas adicionais com detecção automática do tipo, remoção e validação de duplicidades.\r\n- O limite de cinco chaves por banco é mantido. Todas as linhas são validadas antes do salvamento conjunto.\r\n\r\nAtualize o Windows para 1.7.0 para receber as novas verificações durante o uso. Na versão web, recarregue a página uma vez.\r\n",
+  "downloadUrl": "https://github.com/digitalfortuneseekers-cmyk/chaves-pix-elite-atualizacoes/releases/download/v1.7.0/Chaves-Pix-Elite-1.7.0.exe"
+}
