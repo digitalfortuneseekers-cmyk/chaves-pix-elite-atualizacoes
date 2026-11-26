@@ -1,0 +1,18 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const assert=require('node:assert/strict');
+const crypto=require('node:crypto');
+const root=path.resolve(__dirname,'..');
+const meta=JSON.parse(fs.readFileSync(path.join(root,'release.json'),'utf8'));
+assert.match(meta.version,/^\d+\.\d+\.\d+$/);
+assert.equal(meta.asset,`Chaves-Pix-Elite-${meta.version}.exe`);
+assert.match(meta.sha256,/^[a-f0-9]{64}$/);
+const bytes=fs.readFileSync(path.join(root,'downloads',meta.asset));
+assert.equal(bytes.readUInt16LE(0),0x5a4d,'Executável Windows inválido');
+const pe=bytes.readUInt32LE(0x3c);
+assert.ok(pe+4<bytes.length);
+assert.equal(bytes.readUInt32LE(pe),0x00004550,'Cabeçalho PE inválido');
+assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),meta.sha256,'O hash não corresponde à versão aprovada');
+const checksum=fs.readFileSync(path.join(root,'downloads/SHA256SUMS.txt'),'utf8').trim();
+assert.equal(checksum,`${meta.sha256}  ${meta.asset}`);
+console.log(`Versão ${meta.version} e integridade do executável verificadas.`);

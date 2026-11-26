@@ -1,0 +1,50 @@
+name: Publicar atualização
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'release.json'
+      - 'release-notes.md'
+      - 'downloads/**'
+      - 'scripts/verify-release.cjs'
+      - '.github/workflows/publish.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publicar-atualizacao
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar executável e hash
+        shell: pwsh
+        run: |
+          node scripts/verify-release.cjs
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $meta = Get-Content release.json -Raw | ConvertFrom-Json
+          $binary = Join-Path downloads $meta.asset
+          if ((Get-Item -LiteralPath $binary).VersionInfo.ProductVersion -ne $meta.version) {
+            throw 'A versão do executável não corresponde à publicação.'
+          }
+      - name: Publicar Release oficial
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHANNEL_REPOSITORY: ${{ github.repository }}
+          CHANNEL_COMMIT: ${{ github.sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $meta = Get-Content release.json -Raw | ConvertFrom-Json
+          $tag = 'v' + $meta.version
+          gh release view $tag --repo $env:CHANNEL_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Output 'Esta versão já está publicada; os arquivos da Release não foram alterados.'
+            exit 0
+          }
+          $binary = Join-Path downloads $meta.asset
+          gh release create $tag --repo $env:CHANNEL_REPOSITORY --target $env:CHANNEL_COMMIT --title ('Elite ' + $meta.version) --notes-file release-notes.md $binary downloads/SHA256SUMS.txt
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
