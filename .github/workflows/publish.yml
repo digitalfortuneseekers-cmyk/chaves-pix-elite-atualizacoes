@@ -8,6 +8,7 @@ on:
       - 'downloads/**'
       - 'scripts/verify-release.cjs'
       - '.github/workflows/publish.yml'
+      - 'scripts/publish-notice.ps1'
   workflow_dispatch:
 permissions:
   contents: write
@@ -48,3 +49,11 @@ jobs:
           $binary = Join-Path downloads $meta.asset
           gh release create $tag --repo $env:CHANNEL_REPOSITORY --target $env:CHANNEL_COMMIT --title ('Elite ' + $meta.version) --notes-file release-notes.md $binary downloads/SHA256SUMS.txt
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Notificar aplicativos ativos
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHANNEL_REPOSITORY: ${{ github.repository }}
+        run: ./scripts/publish-notice.ps1
+
